@@ -1,0 +1,13 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    env_file:
+      - ./.env
+    ports:
+      - '3307:3306' # Mengubah port host menjadi 3307
+    volumes:
+      - mysqlDb:/var/lib/mysql
+volumes:
+  mysqlDb:
