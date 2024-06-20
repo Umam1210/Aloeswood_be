@@ -14,6 +14,8 @@ use crate::{
     AppState,
 };
 
+// use crate::domain::models::model;
+
 pub async fn health_check_handler() -> impl IntoResponse {
     const MESSAGE: &str = "API Services";
 
@@ -35,22 +37,6 @@ pub async fn note_list_handler(
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    // // Query with macro
-    // let notes = sqlx::query_as!(
-    //     NoteModel,
-    //     r#"SELECT * FROM notes ORDER by id LIMIT ? OFFSET ?"#,
-    //     limit as i32,
-    //     offset as i32
-    // )
-    // .fetch_all(&data.db)
-    // .await
-    // .map_err(|e| {
-    //     let error_response = serde_json::json!({
-    //         "status": "error",
-    //         "message": format!("Database error: { }", e),
-    //     });
-    //     (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
-    // })?;
 
     // Query without macro
     let notes =
@@ -112,17 +98,6 @@ pub async fn create_note_handler(
         ));
     }
 
-    // // Get insereted note by ID with query macro
-    // let note = sqlx::query_as!(NoteModel, r#"SELECT * FROM notes WHERE id = ?"#, id)
-    //     .fetch_one(&data.db)
-    //     .await
-    //     .map_err(|e| {
-    //         (
-    //             StatusCode::INTERNAL_SERVER_ERROR,
-    //             Json(json!({"status": "error","message": format!("{:?}", e)})),
-    //         )
-    //     })?;
-
     // Get insereted note by ID without query macro
     let note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = ?"#)
         .bind(id)
@@ -135,7 +110,7 @@ pub async fn create_note_handler(
             )
         })?;
 
-    let note_response = serde_json::json!({
+    let note_response = serde_json::json!({  
             "status": "success",
             "data": serde_json::json!({
                 "note": to_note_response(&note)
@@ -149,14 +124,6 @@ pub async fn get_note_handler(
     Path(id): Path<uuid::Uuid>,
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    // // get using query macro
-    // let query_result = sqlx::query_as!(
-    //     NoteModel,
-    //     r#"SELECT * FROM notes WHERE id = ?"#,
-    //     id.to_string()
-    // )
-    // .fetch_one(&data.db)
-    // .await;
 
     // get not using query macro
     let query_result = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = ?"#)
@@ -197,14 +164,6 @@ pub async fn edit_note_handler(
     State(data): State<Arc<AppState>>,
     Json(body): Json<UpdateNoteSchema>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    // // validate note with query macro
-    // let query_result = sqlx::query_as!(
-    //     NoteModel,
-    //     r#"SELECT * FROM notes WHERE id = ?"#,
-    //     id.to_string()
-    // )
-    // .fetch_one(&data.db)
-    // .await;
 
     // validate note without query macro
     let query_result = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = ?"#)
@@ -269,21 +228,6 @@ pub async fn edit_note_handler(
         return Err((StatusCode::NOT_FOUND, Json(error_response)));
     }
 
-    // // get updated data with query macro
-    // let updated_note = sqlx::query_as!(
-    //     NoteModel,
-    //     r#"SELECT * FROM notes WHERE id = ?"#,
-    //     id.to_string()
-    // )
-    // .fetch_one(&data.db)
-    // .await
-    // .map_err(|e| {
-    //     (
-    //         StatusCode::INTERNAL_SERVER_ERROR,
-    //         Json(json!({"status": "error","message": format!("{:?}", e)})),
-    //     )
-    // })?;
-
     // get updated data without query macro
     let updated_note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = ?"#)
         .bind(id.to_string())
@@ -310,19 +254,6 @@ pub async fn delete_note_handler(
     Path(id): Path<uuid::Uuid>,
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    // // delete with query macro
-    // let query_result = sqlx::query!(r#"DELETE FROM notes WHERE id = ?"#, id.to_string())
-    //     .execute(&data.db)
-    //     .await
-    //     .map_err(|e| {
-    //         (
-    //             StatusCode::INTERNAL_SERVER_ERROR,
-    //             Json(json!({
-    //                 "status": "error",
-    //                 "message": format!("{:?}", e)
-    //             })),
-    //         )
-    //     })?;
 
     // delete not using query macro
     let query_result = sqlx::query(r#"DELETE FROM notes WHERE id = ?"#)

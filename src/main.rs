@@ -3,6 +3,8 @@ mod model;
 mod route;
 mod schema;
 
+mod domain;
+
 use std::sync::Arc;
 
 use axum::http::{header::CONTENT_TYPE, Method};
