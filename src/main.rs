@@ -6,12 +6,13 @@ mod schema;
 // import modules
 mod domain;
 mod handlers;
+mod infrastructure;
 
 use std::sync::Arc;
 
 use axum::http::{header::CONTENT_TYPE, Method};
 
-use chrono::Utc;
+// use chrono::Utc;
 use dotenv::dotenv;
 use tokio::net::TcpListener;
 
@@ -20,11 +21,12 @@ use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
 use route::create_router;
 use tower_http::cors::{Any, CorsLayer};
 
+#[derive(Clone)]
 pub struct AppState {
     db: MySqlPool,
 }
 
-use crate::domain::models::note::Note;
+// use crate::domain::models::note::Note;
 
 #[tokio::main]
 async fn main() {
@@ -47,16 +49,16 @@ async fn main() {
         }
     };
 
-    let note = Note {
-        id: String::from("1"),
-        title: String::from("Judul Catatan mimew"),
-        content: String::from("Ini adalah isi catatan."),
-        is_published: false,
-        created_at:  Utc::now(),
-        updated_at:  Utc::now(),
-    };
+    // let note = Note {
+    //     id: String::from("1"),
+    //     title: String::from("Judul Catatan mimew"),
+    //     content: String::from("Ini adalah isi catatan."),
+    //     is_published: false,
+    //     created_at:  Utc::now(),
+    //     updated_at:  Utc::now(),
+    // };
 
-    println!("✅ data {:?}", note);
+    // println!("✅ data {:?}", note);
 
 
     let cors = CorsLayer::new()
