@@ -2,7 +2,7 @@
 use chrono::Utc;
 use sqlx::MySqlPool;
 use uuid::Uuid;
-use crate::domain::{models::user::User, schema::user::FilterUser};
+use crate::domain::{models::user::{User, UserResponse}, schema::user::FilterUser};
 use log::error;
 
 pub async fn create_user_repository(db_pool: &MySqlPool, user: &User) -> Result<User, sqlx::Error> {
@@ -42,12 +42,12 @@ pub async fn create_user_repository(db_pool: &MySqlPool, user: &User) -> Result<
 pub async fn get_user_repository(
     opts: Option<FilterUser>, 
     db_pool: &MySqlPool
-) -> Result<Vec<User>, sqlx::Error> {
+) -> Result<Vec<UserResponse>, sqlx::Error> {
    let FilterUser { limit, page } = opts.unwrap_or_default();
     let limit = limit.unwrap_or(10);
     let offset = (page.unwrap_or(1) - 1) * limit;
 
-    let query_result = sqlx::query_as::<_, User>(r#"SELECT * FROM users ORDER BY id LIMIT ? OFFSET ?"#)
+    let query_result = sqlx::query_as::<_, UserResponse>(r#"SELECT * FROM users ORDER BY id LIMIT ? OFFSET ?"#)
         .bind(limit as i32)
         .bind(offset as i32)
         .fetch_all(db_pool)

@@ -13,6 +13,15 @@ pub struct User {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+#[derive(Debug,Deserialize, Serialize, sqlx::FromRow)]
+pub struct UserResponse {
+    pub id: String,
+    pub name: String,
+    pub email: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
+}
+
 // Struct untuk representasi data dari User untuk operasi IO (Input/Output)
 #[derive(Debug,Deserialize, Serialize)]
 pub struct UserDto {
