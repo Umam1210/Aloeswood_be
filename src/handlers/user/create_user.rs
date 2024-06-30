@@ -1,20 +1,16 @@
+use axum::{extract::State, response::IntoResponse, Json};
+use hyper::StatusCode;
 use std::sync::Arc;
 
-use axum::{
-    http::StatusCode, response::{IntoResponse, Response}, Extension, Json
-};
-use sqlx::MySqlPool;
-
-use crate::{domain::models::user::UserDto, infrastructure::repositories::user};
-
-
-
+use crate::{domain::models::user:: UserDto, infrastructure::repositories::user::user::create_user_repository, AppState};
 
 pub async fn create_user_handler(
-    Extension(db_pool): Extension<Arc<MySqlPool>>,
-    Json(user): Json<UserDto>,
-) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    match user::user::create_user_repository(&db_pool, &user).await {
+    State(data): State<Arc<AppState>>,
+    Json(user_dto): Json<UserDto>,
+) -> impl IntoResponse {
+    let user = user_dto.into_user();
+    
+    match create_user_repository(&data.db, &user).await {
         Ok(created_user) => {
             let user_response = serde_json::json!({
                 "status": "success",
@@ -22,20 +18,18 @@ pub async fn create_user_handler(
                     "user": {
                         "id": created_user.id,
                         "name": created_user.name,
-                        "email": created_user.email,
-                        "created_at": created_user.created_at,
-                        "updated_at": created_user.updated_at,
+                        "email": created_user.email
                     }
                 }
             });
-            Ok(Response::new(Json(user_response)))
+            (StatusCode::OK, Json(user_response))
         },
         Err(_) => {
-            let error_response = serde_json::json!!({
+            let error_response = serde_json::json!({
                 "status": "error",
                 "message": "Failed to create user",
             });
-            Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)))
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         }
     }
 }

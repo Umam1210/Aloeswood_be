@@ -1,36 +1,56 @@
 use chrono::Utc;
 use sqlx::MySqlPool;
 use uuid::Uuid;
+use crate::domain::{models::user::User, schema::user::FilterUser};
+use log::error;
 
-use crate::domain::models::user::{User, UserDto};
-
-
-pub async fn create_user_repository(db_pool: &MySqlPool, user: &UserDto) -> Result<User, sqlx::Error> {
+pub async fn create_user_repository(db_pool: &MySqlPool, user: &User) -> Result<User, sqlx::Error> {
     let id = Uuid::new_v4().to_string();
     let created_at = Utc::now();
     let updated_at = created_at;
 
     let query_result = sqlx::query(
-        r#"INSERT INTO users (id, name, email, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?)"#)
+        r#"INSERT INTO users (id, name, email, password, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)"#)
         .bind(&id)
         .bind(&user.name)
         .bind(&user.email)
+        .bind(&user.password)
         .bind(&created_at)
         .bind(&updated_at)
         .execute(db_pool)
-        .await?;
+        .await;
 
-    if query_result.rows_affected() == 1 {
-        Ok(User {
+    match query_result {
+        Ok(_) => Ok(User {
             id,
             name: user.name.clone(),
-            password: String::new(), // Placeholder for now
             email: user.email.clone(),
+            password: user.password.clone(),
             created_at,
             updated_at,
-        })
-    } else {
-        Err(sqlx::Error::RowNotFound) // Or handle accordingly
+        }),
+        Err(e) => {
+            error!("Failed to execute query: {:?}", e);
+            Err(e)
+        }
     }
+}
+
+
+pub async fn get_user_repository(
+    opts: Option<FilterUser>, 
+    db_pool: &MySqlPool
+) -> Result<Vec<User>, sqlx::Error> {
+    let opts = opts.unwrap_or_default();
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let query_result = sqlx::query_as::<_, User>(r#"SELECT * FROM users ORDER BY id LIMIT ? OFFSET ?"#)
+        .bind(limit as i32)
+        .bind(offset as i32)
+        .fetch_all(db_pool)
+        .await;
+
+    query_result
 }

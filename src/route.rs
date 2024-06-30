@@ -10,7 +10,8 @@ use crate::{
         create_note_handler, delete_note_handler, edit_note_handler, get_note_handler,
         health_check_handler, note_list_handler,
     },
-    AppState,
+    handlers::user::{create_user::create_user_handler, get_user::get_user_handler},
+    AppState
 };
 
 pub fn create_router(app_state: Arc<AppState>) -> Router {
@@ -18,6 +19,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/api/healthcheck", get(health_check_handler))
         .route("/api/notes", post(create_note_handler))
         .route("/api/notes", get(note_list_handler))
+
+        .route("/api/user", post(create_user_handler))
+        .route("/api/user", get(get_user_handler))
+
         .route(
             "/api/notes/:id",
             get(get_note_handler)
@@ -25,4 +30,6 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
                 .delete(delete_note_handler),
         )
         .with_state(app_state)
+
+
 }

@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize,Debug, Default)]
+#[derive(Serialize,Debug,Default,Deserialize)]
 pub struct FilterUser {
     pub page : Option<usize>,
     pub limit : Option<usize>,
 }
-
 
 #[derive(Serialize,Debug)]
 pub struct UserParam{
