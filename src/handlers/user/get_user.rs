@@ -10,7 +10,10 @@ pub async fn get_user_handler(
     State(data): State<Arc<AppState>>,
     Query(opts): Query<FilterUser>,
 ) -> impl IntoResponse {
-    match get_user_repository(Some(opts), &data.db).await {
+    let limit = opts.limit.unwrap_or(10);
+    let page = opts.page.unwrap_or( 1);  
+
+   match get_user_repository(Some(FilterUser { limit: Some(limit), page: Some(page) }), &data.db).await {
         Ok(users) => {
             let user_response = serde_json::json!({
                 "status": "success",

@@ -1,3 +1,4 @@
+
 use chrono::Utc;
 use sqlx::MySqlPool;
 use uuid::Uuid;
@@ -42,9 +43,9 @@ pub async fn get_user_repository(
     opts: Option<FilterUser>, 
     db_pool: &MySqlPool
 ) -> Result<Vec<User>, sqlx::Error> {
-    let opts = opts.unwrap_or_default();
-    let limit = opts.limit.unwrap_or(10);
-    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+   let FilterUser { limit, page } = opts.unwrap_or_default();
+    let limit = limit.unwrap_or(10);
+    let offset = (page.unwrap_or(1) - 1) * limit;
 
     let query_result = sqlx::query_as::<_, User>(r#"SELECT * FROM users ORDER BY id LIMIT ? OFFSET ?"#)
         .bind(limit as i32)

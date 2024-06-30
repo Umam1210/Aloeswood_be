@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize,Debug,Default,Deserialize)]
+#[derive(Serialize,Debug,Default, Deserialize)]
 pub struct FilterUser {
     pub page : Option<usize>,
     pub limit : Option<usize>,
